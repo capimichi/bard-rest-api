@@ -1,9 +1,15 @@
+import json
+
 from flasgger import SwaggerView, swag_from
 from flask import request
 from flask_restful import Resource
 
 from model.message import Message
 from schema.message_schema import MessageSchema
+from vyper import v
+
+import requests
+from bardapi import Bard, SESSION_HEADERS
 
 
 class ChatController(Resource):
@@ -36,6 +42,18 @@ class ChatController(Resource):
         # Leggi il messaggio inviato nel body della richiesta
         data = request.get_json()
 
+        token = v.get_string('bard.1PSID')
+        tokenCc = v.get_string('bard.1PSIDCC')
+        tokenTs = v.get_string('bard.1PSIDTS')
+
+        session = requests.Session()
+        session.cookies.set("__Secure-1PSID", token)
+        session.cookies.set("__Secure-1PSIDCC", tokenCc)
+        session.cookies.set("__Secure-1PSIDTS", tokenTs)
+        session.headers = SESSION_HEADERS
+
+        bard = Bard(token=token, session=session)
+
         # create message from schema and data
         schema = MessageSchema()
 
@@ -49,7 +67,12 @@ class ChatController(Resource):
         # Esempio di elaborazione del messaggio
 
         response_message = Message()
-        response_message.setText(f'Hai scritto: {message.getText()}')
+
+        response_data = bard.get_answer(message.getText())
+
+        #response_data = json.loads(response_json)
+        response_text = response_data['content']
+        response_message.setText(response_text)
 
         response_data = schema.dump(response_message)
 

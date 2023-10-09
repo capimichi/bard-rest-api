@@ -4,6 +4,9 @@ from controller.chat_controller import ChatController
 from vyper import v
 
 v.set_default('server.port', 5009)
+v.set_default('bard.1PSID', '')
+v.set_default('bard.1PSIDCC', '')
+v.set_default('bard.1PSIDTS', '')
 
 v.set_config_type('yaml')  # REQUIRED if the config file does not have the extension in the name
 v.set_config_name('config')  # name of config file (without extension)
